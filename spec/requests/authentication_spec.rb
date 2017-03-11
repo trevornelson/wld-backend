@@ -21,6 +21,11 @@ RSpec.describe 'Authentication API', type: :request do
 				expect(json['user']['email']).to eq(user.email)
 				expect(json['user']['password_digest']).to be_falsey
 			end
+
+			it 'includes core values' do
+				expect(json['values']).to be_truthy
+				expect(json['values'].length).to eq(3)
+			end
 		end
 
 		context 'with incorrect credentials' do

@@ -12,7 +12,16 @@ RSpec.describe 'Users API', type: :request do
 			end
 
 			it 'creates a user' do
-				expect(json['id']).to be_truthy
+				expect(json['user']['id']).to be_truthy
+				expect(json['user']['first_name']).to eq(valid_attributes[:first_name])
+				expect(json['user']['last_name']).to eq(valid_attributes[:last_name])
+				expect(json['user']['email']).to eq(valid_attributes[:email])
+				expect(json['user']['password_digest']).to be_falsey
+			end
+
+			it 'creates core values' do
+				expect(json['values']).to be_truthy
+				expect(json['values'].length).to eq(3)
 			end
 		end
 

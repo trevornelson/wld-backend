@@ -4,9 +4,9 @@ class UsersController < ApplicationController
 		@user = User.new(user_params)
 		if @user.valid?
 			@user.save()
-			json_response(@user, :created)
+			json_response({ user: @user, values: @user.values }, :created)
 		else
-			json_response(@user, :bad_request)
+			json_response({ user: @user }, :bad_request)
 		end
 	end
 
