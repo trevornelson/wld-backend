@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 	post 'authenticate', to: 'authentication#authenticate'
 
-	resources :users, only: :create do
+	resources :users, only: [:show, :create] do
 		resources :values, :only => [:index, :create, :update, :destroy]
 		resources :long_term_goals, :only => [:index, :create, :update, :destroy]
 		resources :short_term_goals, :only => [:index, :create, :update, :destroy]

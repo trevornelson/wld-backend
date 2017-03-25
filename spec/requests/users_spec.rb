@@ -34,4 +34,76 @@ RSpec.describe 'Users API', type: :request do
 		end
 
 	end
+
+  describe 'GET /users/:id' do
+		let (:user) { create(:user, { purpose: 'to do stuff' }) }
+
+    context 'when the request is authenticated' do
+			before do
+        @relationship_category = create(:relationship_category, { user_id: user.id })
+        @relationship = create(:relationship, { user_id: user.id, relationship_category_id: @relationship_category.id })
+        @long_term_goal = create(:long_term_goal, { user_id: user.id })
+        @short_term_goal = create(:short_term_goal, { user_id: user.id, long_term_goal_id: @long_term_goal.id })
+        @quarterly_todo = create(:quarterly_todo, { user_id: user.id })
+        @daily_todo = create(:daily_todo, { user_id: user.id })
+        @habit = create(:habit, { user_id: user.id })
+        @habit_todo = create(:habit_todo, { user_id: user.id, habit_id: @habit.id })
+				headers = authenticate_headers(user.email, 'easypassword123')
+				get "/users/#{user.id}", params: {}, headers: headers
+			end
+
+      it 'responds with a 200 response code' do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'returns the dashboard core purpose' do
+        expect(json['purpose']).to eq('to do stuff')
+      end
+
+      it 'returns the dashboard core values' do
+        expect(json['values']).to be
+        expect(json['values'].count).to eq(3)
+      end
+
+      it 'returns the dashboard relationships' do
+        expect(json['relationship_categories']).to be
+        expect(json['relationship_categories'][0]['id']).to eq(@relationship_category.id)
+        expect(json['relationship_categories'][0]['relationships']).to be
+        expect(json['relationship_categories'][0]['relationships'][0]['id']).to eq(@relationship.id)
+      end
+
+      it 'returns the dashboard long term goals' do
+        expect(json['long_term_goals']).to be
+        expect(json['long_term_goals'][0]['id']).to eq(@long_term_goal.id)
+      end
+
+      it 'returns the dashboard short term goals' do
+        expect(json['short_term_goals']).to be
+        expect(json['short_term_goals'][0]['id']).to eq(@short_term_goal.id)
+        expect(json['short_term_goals'][0]['long_term_goal']).to be
+        expect(json['short_term_goals'][0]['long_term_goal']['id']).to eq(@long_term_goal.id)
+      end
+
+      it 'returns the dashboard quarterly todos' do
+        expect(json['quarterly_todos']).to be
+        expect(json['quarterly_todos'][0]['id']).to eq(@quarterly_todo.id)
+      end
+
+      it 'returns the dashboard daily todos' do
+        expect(json['daily_todos']).to be
+        expect(json['daily_todos'][0]['id']).to eq(@daily_todo.id)
+      end
+    end
+
+    context 'when the request is unauthenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'wrongpassword')
+				get "/users/#{user.id}", params: {}, headers: headers
+			end
+
+      it 'responds with an unauthorized response code' do
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end

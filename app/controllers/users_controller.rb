@@ -1,4 +1,13 @@
 class UsersController < ApplicationController
+  before_action :authenticate_request, except: [:create]
+
+  def show
+    if @user
+      json_response(@user.to_dashboard, :ok)
+    else
+      json_response({}, :not_found)
+    end
+  end
 
 	def create
 		@user = User.new(user_params)

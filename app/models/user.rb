@@ -22,6 +22,34 @@ class User < ApplicationRecord
 		super(options.merge({ except: [:password_digest] }))
 	end
 
+  def to_dashboard
+    User.includes(
+      :values,
+      :long_term_goals,
+      :quarterly_todos,
+      :daily_todos,
+      short_term_goals: :long_term_goal,
+      relationship_categories: :relationships,
+      habits: :habit_todos
+    ).find(id).to_json(
+      include: {
+        values: {},
+        long_term_goals: {},
+        quarterly_todos: {},
+        daily_todos: {},
+        short_term_goals: {
+          include: :long_term_goal
+        },
+        relationship_categories: {
+          include: :relationships
+        },
+        habits: {
+          include: :habit_todos
+        }
+      }
+    )
+  end
+
 	private
 		def generate_core_values
 			3.times { values.create(content: '') }

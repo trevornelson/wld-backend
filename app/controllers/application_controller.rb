@@ -20,7 +20,12 @@ class ApplicationController < ActionController::API
 	end
 
 	def set_user
-		@user = User.find(params[:user_id])
+		@user = User.find(user_id)
 	end
+
+  def user_id
+    return params[:id] if params[:controller] == 'users'
+    params[:user_id]
+  end
 
 end
