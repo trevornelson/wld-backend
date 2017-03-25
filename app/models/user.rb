@@ -50,6 +50,15 @@ class User < ApplicationRecord
     )
   end
 
+  def to_token
+    {
+      'id' => id,
+      'first_name' => first_name,
+      'last_name' => last_name,
+      'email' => email,
+    }
+  end
+
 	private
 		def generate_core_values
 			3.times { values.create(content: '') }
