@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 	post 'authenticate', to: 'authentication#authenticate'
+  post 'validate_token', to: 'authentication#validate_token'
 
 	resources :users, only: [:show, :create] do
 		resources :values, :only => [:index, :create, :update, :destroy]

@@ -21,11 +21,6 @@ RSpec.describe 'Authentication API', type: :request do
 				expect(json['user']['email']).to eq(user.email)
 				expect(json['user']['password_digest']).to be_falsey
 			end
-
-			it 'includes core values' do
-				expect(json['values']).to be_truthy
-				expect(json['values'].length).to eq(3)
-			end
 		end
 
 		context 'with incorrect credentials' do
@@ -39,6 +34,25 @@ RSpec.describe 'Authentication API', type: :request do
 				expect(json['auth_token']).to be_falsey
 			end
 		end
-
 	end
+
+  describe 'POST /validate_token' do
+    let (:user) { create(:user) }
+    let (:token) { 'mocktoken' }
+
+    context 'with valid token' do
+      let (:decoded_token) do
+        { 'user' => { 'id' => user.id }, 'exp' => 3.days.from_now.to_i }
+      end
+      before do
+        allow(JsonWebToken).to receive(:decode).with(token) { decoded_token }
+        post '/validate_token', params: { token: token }
+      end
+
+      it 'returns the decoded user data' do
+        expect(response).to have_http_status(:ok)
+        expect(json['user']['id']).to eq(user.id)
+      end
+    end
+  end
 end
