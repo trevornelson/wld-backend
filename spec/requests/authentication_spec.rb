@@ -42,7 +42,7 @@ RSpec.describe 'Authentication API', type: :request do
 
     context 'with valid token' do
       let (:decoded_token) do
-        { 'user' => { 'id' => user.id }, 'exp' => 3.days.from_now.to_i }
+        { 'user' => user.to_token, 'exp' => 3.days.from_now.to_i }
       end
       before do
         allow(JsonWebToken).to receive(:decode).with(token) { decoded_token }
