@@ -19,6 +19,15 @@ class UsersController < ApplicationController
 		end
 	end
 
+  def update
+    if @user
+      @user.update_attributes(user_params)
+      json_response(@user, :ok)
+    else
+      json_response(@user, :bad_request)
+    end
+  end
+
 	private
 
 	def user_params

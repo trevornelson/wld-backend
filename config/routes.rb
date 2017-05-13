@@ -2,7 +2,7 @@ Rails.application.routes.draw do
 	post 'authenticate', to: 'authentication#authenticate'
   post 'validate_token', to: 'authentication#validate_token'
 
-	resources :users, only: [:show, :create] do
+	resources :users, only: [:show, :create, :update] do
 		resources :values, :only => [:index, :create, :update, :destroy]
 		resources :long_term_goals, :only => [:index, :create, :update, :destroy]
 		resources :short_term_goals, :only => [:index, :create, :update, :destroy]
@@ -12,4 +12,7 @@ Rails.application.routes.draw do
 			resources :relationships, :only => [:index, :create, :update, :destroy]
 		end
 	end
+
+  get 'users/:user_id/daily_todos/prev/:number_of_weeks', to: 'daily_todos#prev'
+  get 'users/:user_id/daily_todos/next/:number_of_weeks', to: 'daily_todos#next'
 end

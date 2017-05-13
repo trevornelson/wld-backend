@@ -67,7 +67,7 @@ RSpec.describe 'Long Term Goals API', type: :request do
 			before do
 				headers = authenticate_headers(user.email, 'wrongpassword')
 				put "/users/#{user.id}/long_term_goals/#{long_term_goal.id}",
-					params: { category: 'Personal', timeframe: 5, content: 'new content' },
+					params: { category: 'Personal', timeframe: '5', content: 'new content' },
 					headers: headers
 			end
 
@@ -80,7 +80,7 @@ RSpec.describe 'Long Term Goals API', type: :request do
 			before do
 				headers = authenticate_headers(user.email, 'easypassword123')
 				put "/users/#{user.id}/long_term_goals/#{long_term_goal.id}",
-					params: { category: 'Personal', timeframe: 5, content: 'new content' },
+					params: { category: 'Personal', timeframe: '5', content: 'new content' },
 					headers: headers
 			end
 

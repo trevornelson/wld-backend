@@ -37,7 +37,42 @@ class DailyTodosController < ApplicationController
 		end
 	end
 
+  def prev
+    todos = @user.daily_todos
+              .where(due_date: first_day(:prev)..last_day(:prev))
+              .order(:due_date)
+
+    json_response(todos, :ok)
+  end
+
+  def next
+    todos = @user.daily_todos
+              .where(due_date: first_day(:next)..last_day(:next))
+              .order(:due_date)
+
+    json_response(todos, :ok)
+  end
+
 	private
+
+  def mid_date(mode)
+    case mode
+    when :prev then number_of_weeks.weeks.ago
+    when :next then number_of_weeks.weeks.from_now
+    end
+  end
+
+  def first_day(mode)
+    mid_date(mode) - 3.days
+  end
+
+  def last_day(mode)
+    mid_date(mode) + 3.days
+  end
+
+  def number_of_weeks
+    params[:number_of_weeks].to_i
+  end
 
 	def daily_todo_params
 		params.permit(:due_date, :content, :completed)

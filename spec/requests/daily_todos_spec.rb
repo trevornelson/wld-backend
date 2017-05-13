@@ -28,6 +28,102 @@ RSpec.describe 'Daily Todos API', type: :request do
 
 	end
 
+  describe 'GET /users/:user_id/daily_todos/prev/:number_of_weeks' do
+    let (:user) { create(:user) }
+    before do
+      10.times do |i|
+        n = i + 1
+        create(:daily_todo, {
+          user_id: user.id,
+          due_date: n.days.ago
+        })
+        create(:daily_todo, {
+          user_id: user.id,
+          due_date: n.days.from_now
+        })
+      end
+    end
+
+		context 'when the request is unauthenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'wrongpassword')
+				get "/users/#{user.id}/daily_todos/prev/1", params: {}, headers: headers
+			end
+
+			it 'should return an unauthorized status' do
+				expect(response).to have_http_status(:unauthorized)
+			end
+		end
+
+		context 'when the request is authenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'easypassword123')
+				get "/users/#{user.id}/daily_todos/prev/1", params: {}, headers: headers
+			end
+
+			it 'should return a 200 status' do
+				expect(response).to have_http_status(:ok)
+			end
+
+      it 'should return todos for last week' do
+        expect(json.length).to eq(7)
+        json.each do |todo|
+          expect(Time.parse(todo['due_date']))
+            .to be_within(4.days).of(1.week.ago)
+        end
+      end
+		end
+
+  end
+
+  describe 'GET /users/:user_id/daily_todos/next/:number_of_weeks' do
+    let (:user) { create(:user) }
+    before do
+      10.times do |i|
+        n = i + 1
+        create(:daily_todo, {
+          user_id: user.id,
+          due_date: n.days.ago
+        })
+        create(:daily_todo, {
+          user_id: user.id,
+          due_date: n.days.from_now
+        })
+      end
+    end
+
+		context 'when the request is unauthenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'wrongpassword')
+				get "/users/#{user.id}/daily_todos/next/1", params: {}, headers: headers
+			end
+
+			it 'should return an unauthorized status' do
+				expect(response).to have_http_status(:unauthorized)
+			end
+		end
+
+		context 'when the request is authenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'easypassword123')
+				get "/users/#{user.id}/daily_todos/next/1", params: {}, headers: headers
+			end
+
+			it 'should return a 200 status' do
+				expect(response).to have_http_status(:ok)
+			end
+
+      it 'should return todos for next week' do
+        expect(json.length).to eq(7)
+        json.each do |todo|
+          expect(Time.parse(todo['due_date']))
+            .to be_within(4.days).of(1.week.from_now)
+        end
+      end
+		end
+
+  end
+
 	describe 'POST /users/:user_id/daily_todos' do
 		let (:user) { create(:user) }
 		let (:valid_attributes) { attributes_for(:daily_todo) }

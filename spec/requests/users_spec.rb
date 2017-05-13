@@ -45,7 +45,18 @@ RSpec.describe 'Users API', type: :request do
         @long_term_goal = create(:long_term_goal, { user_id: user.id })
         @short_term_goal = create(:short_term_goal, { user_id: user.id, long_term_goal_id: @long_term_goal.id })
         @quarterly_todo = create(:quarterly_todo, { user_id: user.id })
-        @daily_todo = create(:daily_todo, { user_id: user.id })
+        create(:daily_todo, { user_id: user.id, due_date: Date.today })
+        4.times do |i|
+          n = i + 1
+          create(:daily_todo, {
+            user_id: user.id,
+            due_date: n.days.ago
+          })
+          create(:daily_todo, {
+            user_id: user.id,
+            due_date: n.days.from_now
+          })
+        end
         @habit = create(:habit, { user_id: user.id })
         @habit_todo = create(:habit_todo, { user_id: user.id, habit_id: @habit.id })
 				headers = authenticate_headers(user.email, 'easypassword123')
@@ -90,8 +101,15 @@ RSpec.describe 'Users API', type: :request do
       end
 
       it 'returns the dashboard daily todos' do
-        expect(json['daily_todos']).to be
-        expect(json['daily_todos'][0]['id']).to eq(@daily_todo.id)
+        expect(json['recent_todos']).to be
+        expect(json['recent_todos'].length).to eq(7)
+        expect(json['recent_todos'][0]['due_date']).to eq(3.days.ago.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][1]['due_date']).to eq(2.days.ago.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][2]['due_date']).to eq(1.days.ago.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][3]['due_date']).to eq(Time.now.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][4]['due_date']).to eq(1.days.from_now.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][5]['due_date']).to eq(2.days.from_now.strftime('%Y-%m-%d'))
+        expect(json['recent_todos'][6]['due_date']).to eq(3.days.from_now.strftime('%Y-%m-%d'))
       end
     end
 

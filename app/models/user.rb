@@ -4,8 +4,11 @@ class User < ApplicationRecord
 	after_create :generate_core_values
 	before_save :downcase_email
 
-	validates_presence_of :email, :first_name, :last_name, :password
-	validates_uniqueness_of :email, case_sensitive: false
+	validates_presence_of :email, :first_name, :last_name
+  validates :password, presence: true,
+                       confirmation: true,
+                       on: :create
+  validates_uniqueness_of :email, case_sensitive: false
 	validates_format_of :email, with: /@/
 
 	has_many :values
@@ -17,6 +20,8 @@ class User < ApplicationRecord
 	has_many :long_term_goals
 	has_many :quarterly_todos
 	has_many :daily_todos
+
+  has_many :recent_todos, -> { where(due_date: 3.days.ago..3.days.from_now).order(:due_date) }, class_name: "DailyTodo"
 
 	def as_json(options={})
 		super(options.merge({ except: [:password_digest] }))
@@ -36,7 +41,7 @@ class User < ApplicationRecord
         values: {},
         long_term_goals: {},
         quarterly_todos: {},
-        daily_todos: {},
+        recent_todos: {},
         short_term_goals: {
           include: :long_term_goal
         },
