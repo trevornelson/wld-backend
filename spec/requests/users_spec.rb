@@ -37,6 +37,7 @@ RSpec.describe 'Users API', type: :request do
 
   describe 'GET /users/:id' do
 		let (:user) { create(:user, { purpose: 'to do stuff' }) }
+    let (:week_start) { DateTime.now.beginning_of_week }
 
     context 'when the request is authenticated' do
 			before do
@@ -45,16 +46,16 @@ RSpec.describe 'Users API', type: :request do
         @long_term_goal = create(:long_term_goal, { user_id: user.id })
         @short_term_goal = create(:short_term_goal, { user_id: user.id, long_term_goal_id: @long_term_goal.id })
         @quarterly_todo = create(:quarterly_todo, { user_id: user.id })
-        create(:daily_todo, { user_id: user.id, due_date: Date.today })
-        4.times do |i|
+        create(:daily_todo, { user_id: user.id, due_date: week_start })
+        10.times do |i|
           n = i + 1
           create(:daily_todo, {
             user_id: user.id,
-            due_date: n.days.ago
+            due_date: week_start - n.days
           })
           create(:daily_todo, {
             user_id: user.id,
-            due_date: n.days.from_now
+            due_date: week_start + n.days
           })
         end
         @habit = create(:habit, { user_id: user.id })
@@ -103,13 +104,9 @@ RSpec.describe 'Users API', type: :request do
       it 'returns the dashboard daily todos' do
         expect(json['recent_todos']).to be
         expect(json['recent_todos'].length).to eq(7)
-        expect(json['recent_todos'][0]['due_date']).to eq(3.days.ago.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][1]['due_date']).to eq(2.days.ago.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][2]['due_date']).to eq(1.days.ago.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][3]['due_date']).to eq(Time.now.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][4]['due_date']).to eq(1.days.from_now.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][5]['due_date']).to eq(2.days.from_now.strftime('%Y-%m-%d'))
-        expect(json['recent_todos'][6]['due_date']).to eq(3.days.from_now.strftime('%Y-%m-%d'))
+        7.times do |i|
+          expect(json['recent_todos'][i]['due_date']).to eq((week_start + i.days).strftime('%Y-%m-%d'))
+        end
       end
     end
 

@@ -30,16 +30,21 @@ RSpec.describe 'Daily Todos API', type: :request do
 
   describe 'GET /users/:user_id/daily_todos/prev/:number_of_weeks' do
     let (:user) { create(:user) }
+    let (:last_week) { 1.week.ago }
+    let (:week_start) { last_week.beginning_of_week }
+    let (:week_end) { last_week.end_of_week }
+
     before do
+      create(:daily_todo, { user_id: user.id, due_date: week_start })
       10.times do |i|
         n = i + 1
         create(:daily_todo, {
           user_id: user.id,
-          due_date: n.days.ago
+          due_date: week_start - n.days
         })
         create(:daily_todo, {
           user_id: user.id,
-          due_date: n.days.from_now
+          due_date: week_start + n.days
         })
       end
     end
@@ -69,7 +74,10 @@ RSpec.describe 'Daily Todos API', type: :request do
         expect(json.length).to eq(7)
         json.each do |todo|
           expect(Time.parse(todo['due_date']))
-            .to be_within(4.days).of(1.week.ago)
+            .to be >= week_start
+
+          expect(Time.parse(todo['due_date']))
+            .to be <= week_end
         end
       end
 		end
@@ -78,16 +86,21 @@ RSpec.describe 'Daily Todos API', type: :request do
 
   describe 'GET /users/:user_id/daily_todos/next/:number_of_weeks' do
     let (:user) { create(:user) }
+    let (:next_week) { 1.week.from_now }
+    let (:week_start) { next_week.beginning_of_week }
+    let (:week_end) { next_week.end_of_week }
+
     before do
+      create(:daily_todo, { user_id: user.id, due_date: week_start })
       10.times do |i|
         n = i + 1
         create(:daily_todo, {
           user_id: user.id,
-          due_date: n.days.ago
+          due_date: week_start - n.days
         })
         create(:daily_todo, {
           user_id: user.id,
-          due_date: n.days.from_now
+          due_date: week_start + n.days
         })
       end
     end
@@ -117,7 +130,10 @@ RSpec.describe 'Daily Todos API', type: :request do
         expect(json.length).to eq(7)
         json.each do |todo|
           expect(Time.parse(todo['due_date']))
-            .to be_within(4.days).of(1.week.from_now)
+            .to be >= week_start
+
+          expect(Time.parse(todo['due_date']))
+            .to be <= week_end
         end
       end
 		end

@@ -21,7 +21,9 @@ class User < ApplicationRecord
 	has_many :quarterly_todos
 	has_many :daily_todos
 
-  has_many :recent_todos, -> { where(due_date: 3.days.ago..3.days.from_now).order(:due_date) }, class_name: "DailyTodo"
+  has_many :recent_todos,
+    -> { where(due_date: DateTime.now.beginning_of_week..DateTime.now.end_of_week).order(:due_date) },
+    class_name: "DailyTodo"
 
 	def as_json(options={})
 		super(options.merge({ except: [:password_digest] }))
