@@ -22,7 +22,7 @@ class User < ApplicationRecord
 	has_many :daily_todos
 
   has_many :recent_todos,
-    -> { where(due_date: DateTime.now.beginning_of_week..DateTime.now.end_of_week).order(:due_date) },
+    -> { where(due_date: DateTime.now.beginning_of_week(start_day = :sunday)..DateTime.now.end_of_week(start_day = :sunday)).order(:due_date, :created_at) },
     class_name: "DailyTodo"
 
 	def as_json(options={})

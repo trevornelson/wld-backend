@@ -31,8 +31,8 @@ RSpec.describe 'Daily Todos API', type: :request do
   describe 'GET /users/:user_id/daily_todos/prev/:number_of_weeks' do
     let (:user) { create(:user) }
     let (:last_week) { 1.week.ago }
-    let (:week_start) { last_week.beginning_of_week }
-    let (:week_end) { last_week.end_of_week }
+    let (:week_start) { last_week.beginning_of_week(start_day = :sunday) }
+    let (:week_end) { last_week.end_of_week(start_day = :sunday) }
 
     before do
       create(:daily_todo, { user_id: user.id, due_date: week_start })
@@ -87,8 +87,8 @@ RSpec.describe 'Daily Todos API', type: :request do
   describe 'GET /users/:user_id/daily_todos/next/:number_of_weeks' do
     let (:user) { create(:user) }
     let (:next_week) { 1.week.from_now }
-    let (:week_start) { next_week.beginning_of_week }
-    let (:week_end) { next_week.end_of_week }
+    let (:week_start) { next_week.beginning_of_week(start_day = :sunday) }
+    let (:week_end) { next_week.end_of_week(start_day = :sunday) }
 
     before do
       create(:daily_todo, { user_id: user.id, due_date: week_start })

@@ -37,7 +37,7 @@ RSpec.describe 'Users API', type: :request do
 
   describe 'GET /users/:id' do
 		let (:user) { create(:user, { purpose: 'to do stuff' }) }
-    let (:week_start) { DateTime.now.beginning_of_week }
+    let (:week_start) { DateTime.now.beginning_of_week(start_day = :sunday) }
 
     context 'when the request is authenticated' do
 			before do

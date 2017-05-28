@@ -63,11 +63,11 @@ class DailyTodosController < ApplicationController
   end
 
   def first_day(mode)
-    mid_date(mode).beginning_of_week
+    mid_date(mode).beginning_of_week(start_day = :sunday)
   end
 
   def last_day(mode)
-    mid_date(mode).end_of_week
+    mid_date(mode).end_of_week(start_day = :sunday)
   end
 
   def number_of_weeks
