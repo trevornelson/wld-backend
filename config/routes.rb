@@ -8,6 +8,8 @@ Rails.application.routes.draw do
 		resources :short_term_goals, :only => [:index, :create, :update, :destroy]
 		resources :quarterly_todos, :only => [:index, :create, :update, :destroy]
 		resources :daily_todos, :only => [:index, :create, :update, :destroy]
+    resources :habits, :only => [:create, :update, :destroy]
+    resources :habit_todos, :only => [:create, :destroy]
 		resources :relationship_categories, :only => [:index, :create, :update, :destroy] do
 			resources :relationships, :only => [:index, :create, :update, :destroy]
 		end

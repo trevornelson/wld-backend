@@ -25,6 +25,10 @@ class User < ApplicationRecord
     -> { where(due_date: DateTime.now.beginning_of_week(start_day = :sunday)..DateTime.now.end_of_week(start_day = :sunday)).order(:due_date, :created_at) },
     class_name: "DailyTodo"
 
+  has_many :active_habits,
+    -> { where(active: true) },
+    class_name: "Habit"
+
 	def as_json(options={})
 		super(options.merge({ except: [:password_digest] }))
 	end
@@ -35,24 +39,24 @@ class User < ApplicationRecord
       :long_term_goals,
       :quarterly_todos,
       :daily_todos,
+      :habits,
+      :habit_todos,
       short_term_goals: :long_term_goal,
       relationship_categories: :relationships,
-      habits: :habit_todos
     ).find(id).to_json(
       include: {
         values: {},
         long_term_goals: {},
         quarterly_todos: {},
         recent_todos: {},
+        active_habits: {},
+        habit_todos: {},
         short_term_goals: {
           include: :long_term_goal
         },
         relationship_categories: {
           include: :relationships
         },
-        habits: {
-          include: :habit_todos
-        }
       }
     )
   end

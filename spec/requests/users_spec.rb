@@ -58,8 +58,10 @@ RSpec.describe 'Users API', type: :request do
             due_date: week_start + n.days
           })
         end
-        @habit = create(:habit, { user_id: user.id })
-        @habit_todo = create(:habit_todo, { user_id: user.id, habit_id: @habit.id })
+        @deactivated_habit = create(:habit, { user_id: user.id, active: false })
+        3.times do |i|
+          habit = create(:habit, { user_id: user.id })
+        end
 				headers = authenticate_headers(user.email, 'easypassword123')
 				get "/users/#{user.id}", params: {}, headers: headers
 			end
@@ -107,6 +109,11 @@ RSpec.describe 'Users API', type: :request do
         7.times do |i|
           expect(json['recent_todos'][i]['due_date']).to eq((week_start + i.days).strftime('%Y-%m-%d'))
         end
+      end
+
+      it 'returns the dashboard habits' do
+        expect(json['active_habits']).to be
+        expect(json['active_habits'].length).to eq(3)
       end
     end
 
