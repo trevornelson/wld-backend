@@ -20,6 +20,8 @@ class User < ApplicationRecord
 	has_many :long_term_goals
 	has_many :quarterly_todos
 	has_many :daily_todos
+  has_many :affirmations
+  has_many :visualizations
 
   has_many :recent_todos,
     -> { where(due_date: DateTime.now.beginning_of_week(start_day = :sunday)..DateTime.now.end_of_week(start_day = :sunday)).order(:due_date, :created_at) },
@@ -28,6 +30,10 @@ class User < ApplicationRecord
   has_many :active_habits,
     -> { where(active: true) },
     class_name: "Habit"
+
+  def s3_bucket_key
+    "uploads/#{id}/#{SecureRandom.uuid}/${filename}"
+  end
 
 	def as_json(options={})
 		super(options.merge({ except: [:password_digest] }))
@@ -41,6 +47,8 @@ class User < ApplicationRecord
       :daily_todos,
       :habits,
       :habit_todos,
+      :affirmations,
+      :visualizations,
       short_term_goals: :long_term_goal,
       relationship_categories: :relationships,
     ).find(id).to_json(
@@ -51,6 +59,8 @@ class User < ApplicationRecord
         recent_todos: {},
         active_habits: {},
         habit_todos: {},
+        affirmations: {},
+        visualizations: {},
         short_term_goals: {
           include: :long_term_goal
         },

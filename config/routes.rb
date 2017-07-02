@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 		resources :daily_todos, :only => [:index, :create, :update, :destroy]
     resources :habits, :only => [:create, :update, :destroy]
     resources :habit_todos, :only => [:create, :destroy]
+    resources :visualizations, :only => [:index, :create, :update, :destroy]
+    resources :affirmations, :only => [:index, :create, :update, :destroy]
 		resources :relationship_categories, :only => [:index, :create, :update, :destroy] do
 			resources :relationships, :only => [:index, :create, :update, :destroy]
 		end
@@ -17,4 +19,5 @@ Rails.application.routes.draw do
 
   get 'users/:user_id/daily_todos/prev/:number_of_weeks', to: 'daily_todos#prev'
   get 'users/:user_id/daily_todos/next/:number_of_weeks', to: 'daily_todos#next'
+  get 'users/:id/presigned_url', to: 'users#presigned_url'
 end

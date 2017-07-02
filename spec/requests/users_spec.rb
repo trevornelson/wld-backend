@@ -1,6 +1,55 @@
 require 'rails_helper'
 
 RSpec.describe 'Users API', type: :request do
+  describe 'GET /users/:user_id/presigned_url' do
+    let (:user) { create(:user) }
+    let (:bucket_name) { 'mr-bucket' }
+    let (:presigned_url) { "https://#{bucket_name}.aws.amazon.com/signed/url" }
+    let (:s3_bucket_stub) do
+      client_stub = Aws::S3::Client.new(stub_responses: true)
+      client_stub.stub_responses(:list_buckets, {
+        buckets: [{ name: bucket_name }]
+      })
+      Aws::S3::Resource.new(client: client_stub).bucket(bucket_name)
+    end
+
+    before do
+      allow(s3_bucket_stub)
+        .to receive(:presigned_post)
+        .and_return(presigned_url)
+
+      allow_any_instance_of(UsersController)
+        .to receive(:s3_bucket)
+        .and_return(s3_bucket_stub)
+    end
+
+		context 'when the request is unauthenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'wrongpassword')
+				get "/users/#{user.id}/presigned_url", params: {}, headers: headers
+			end
+
+			it 'should return an unauthorized status' do
+				expect(response).to have_http_status(:unauthorized)
+			end
+		end
+
+		context 'when the request is authenticated' do
+			before do
+				headers = authenticate_headers(user.email, 'easypassword123')
+				get "/users/#{user.id}/presigned_url", params: {}, headers: headers
+			end
+
+			it 'should return a 200 status' do
+				expect(response).to have_http_status(:ok)
+			end
+
+      it 'should return a new signed post url to the correct S3 bucket' do
+        expect(json['signed_s3_url']).to eq(presigned_url)
+      end
+		end
+  end
+
 	describe 'POST /users' do
 		let (:valid_attributes) { attributes_for(:user) }
 
@@ -62,6 +111,9 @@ RSpec.describe 'Users API', type: :request do
         3.times do |i|
           habit = create(:habit, { user_id: user.id })
         end
+        @affirmation = create(:affirmation, { user_id: user.id })
+        @visualization = create(:visualization, { user_id: user.id })
+
 				headers = authenticate_headers(user.email, 'easypassword123')
 				get "/users/#{user.id}", params: {}, headers: headers
 			end
@@ -114,6 +166,18 @@ RSpec.describe 'Users API', type: :request do
       it 'returns the dashboard habits' do
         expect(json['active_habits']).to be
         expect(json['active_habits'].length).to eq(3)
+      end
+
+      it 'returns the dashboard affirmations' do
+        expect(json['affirmations']).to be
+        expect(json['affirmations'][0]['id']).to eq(@affirmation.id)
+        expect(json['affirmations'][0]['content']).to eq(@affirmation.content)
+      end
+
+      it 'returns the dashboard visualizations' do
+        expect(json['visualizations']).to be
+        expect(json['visualizations'][0]['id']).to eq(@visualization.id)
+        expect(json['visualizations'][0]['caption']).to eq(@visualization.caption)
       end
     end
 

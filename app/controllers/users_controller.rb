@@ -28,7 +28,26 @@ class UsersController < ApplicationController
     end
   end
 
+  def presigned_url
+    url = s3_bucket.presigned_post(
+            key: @user.s3_bucket_key,
+            success_action_status: '201',
+            acl: 'public-read'
+          )
+
+    if url
+      json_response({ signed_s3_url: url }, :ok)
+    else
+      json_response({ message: 'Could not fetch presigned s3 url.' }, :service_unavailable)
+    end
+
+  end
+
 	private
+
+  def s3_bucket
+    S3_BUCKET
+  end
 
 	def user_params
 		params.permit(:email, :password, :password_confirmation, :first_name, :last_name, :purpose)
