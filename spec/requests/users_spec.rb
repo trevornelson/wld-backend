@@ -21,33 +21,17 @@ RSpec.describe 'Users API', type: :request do
       allow_any_instance_of(UsersController)
         .to receive(:s3_bucket)
         .and_return(s3_bucket_stub)
+
+      get "/users/#{user.id}/presigned_url"
     end
 
-		context 'when the request is unauthenticated' do
-			before do
-				headers = authenticate_headers(user.email, 'wrongpassword')
-				get "/users/#{user.id}/presigned_url", params: {}, headers: headers
-			end
+    it 'should return a 200 status' do
+      expect(response).to have_http_status(:ok)
+    end
 
-			it 'should return an unauthorized status' do
-				expect(response).to have_http_status(:unauthorized)
-			end
-		end
-
-		context 'when the request is authenticated' do
-			before do
-				headers = authenticate_headers(user.email, 'easypassword123')
-				get "/users/#{user.id}/presigned_url", params: {}, headers: headers
-			end
-
-			it 'should return a 200 status' do
-				expect(response).to have_http_status(:ok)
-			end
-
-      it 'should return a new signed post url to the correct S3 bucket' do
-        expect(json['signed_s3_url']).to eq(presigned_url)
-      end
-		end
+    it 'should return a new signed post url to the correct S3 bucket' do
+      expect(json['signedUrl']).to eq(presigned_url)
+    end
   end
 
 	describe 'POST /users' do

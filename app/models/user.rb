@@ -32,7 +32,7 @@ class User < ApplicationRecord
     class_name: "Habit"
 
   def s3_bucket_key
-    "uploads/#{id}/#{SecureRandom.uuid}/${filename}"
+    "uploads/#{id}/#{SecureRandom.uuid}"
   end
 
 	def as_json(options={})

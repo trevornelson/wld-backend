@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :authenticate_request, except: [:create]
+  before_action :authenticate_request, except: [:create, :presigned_url]
 
   def show
     if @user
@@ -29,14 +29,20 @@ class UsersController < ApplicationController
   end
 
   def presigned_url
-    url = s3_bucket.presigned_post(
-            key: @user.s3_bucket_key,
-            success_action_status: '201',
-            acl: 'public-read'
-          )
+    @user = User.find(params[:id])
+    json_response({ message: 'Could not fetch presigned s3 url.' }, :not_found) unless @user
+
+    headers = { "Content-Type" => params[:contentType], "x-amz-acl" => "public-read" }
+
+    url = s3_storage.put_object_url(
+      ENV['S3_BUCKET'],
+      "#{@user.s3_bucket_key}/#{params[:objectName]}",
+      15.minutes.from_now.to_time.to_i,
+      headers,
+    )
 
     if url
-      json_response({ signed_s3_url: url }, :ok)
+      json_response({ signedUrl: url }, :ok)
     else
       json_response({ message: 'Could not fetch presigned s3 url.' }, :service_unavailable)
     end
@@ -45,8 +51,8 @@ class UsersController < ApplicationController
 
 	private
 
-  def s3_bucket
-    S3_BUCKET
+  def s3_storage
+    S3_STORAGE
   end
 
 	def user_params

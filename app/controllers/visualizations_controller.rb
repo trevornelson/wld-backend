@@ -6,7 +6,7 @@ class VisualizationsController < ApplicationController
   end
 
   def create
-    @visualization = @user.visualization.new(visualization_params)
+    @visualization = @user.visualizations.new(visualization_params)
 
     if @visualization.valid?
       @visualization.save
